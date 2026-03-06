@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuizMatch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Readex Pro', sans-serif;
+  background: #0d1b2a;
+  color: #fff;
+  min-height: 100vh;
+  user-select: none;
+}
+
+/* ── Setup ── */
+#setup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  padding: max(5vh, 1.5rem) 1rem 7rem;
+  gap: clamp(0.75rem, 2vh, 1.5rem);
+}
+
+#setup h1 {
+  font-size: clamp(1.8rem, 6vw, 3rem);
+  color: #f9d74e;
+  text-shadow: 0 0 40px rgba(249,215,78,0.4);
+  letter-spacing: -1px;
+}
+
+.setup-box {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: clamp(1rem, 3vh, 2rem);
+  width: 100%;
+  max-width: 460px;
+}
+
+
+.setup-label {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+}
+
+.deck-btns {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: clamp(0.75rem, 2vh, 1.75rem);
+}
+
+.deck-btn {
+  flex: 1;
+  padding: 0.65rem 0.5rem;
+  border-radius: 10px;
+  border: 2px solid rgba(255,255,255,0.15);
+  background: transparent;
+  color: rgba(255,255,255,0.6);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+.deck-btn .deck-icon { font-size: 1.8rem; line-height: 1; }
+.deck-btn:hover { border-color: rgba(249,215,78,0.4); color: #fff; }
+.deck-btn.active { background: #f9d74e; border-color: #f9d74e; color: #0d1b2a; }
+
+.player-count-btns {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: clamp(0.75rem, 2vh, 1.75rem);
+}
+
+.pcnt-btn {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: 10px;
+  border: 2px solid rgba(255,255,255,0.15);
+  background: transparent;
+  color: rgba(255,255,255,0.6);
+  font-size: 1.3rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.pcnt-btn:hover { border-color: rgba(249,215,78,0.4); color: #fff; }
+.pcnt-btn.active {
+  background: #f9d74e;
+  border-color: #f9d74e;
+  color: #0d1b2a;
+}
+.size-btn {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: 10px;
+  border: 2px solid rgba(255,255,255,0.15);
+  background: transparent;
+  color: rgba(255,255,255,0.6);
+  font-size: 1.3rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.size-btn:hover { border-color: rgba(249,215,78,0.4); color: #fff; }
+.size-btn.active { background: #f9d74e; border-color: #f9d74e; color: #0d1b2a; }
+.size-sub { font-size: 0.7rem; font-weight: 400; opacity: 0.7; }
+
+#player-inputs { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: clamp(0.75rem, 2vh, 1.5rem); }
+
+.player-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.player-color-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.player-name-input {
+  flex: 1;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.13);
+  border-radius: 8px;
+  padding: 0.5rem 0.85rem;
+  color: #fff;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.player-name-input:focus { border-color: #f9d74e; }
+
+#start-btn {
+  width: 100%;
+  padding: 0.85rem;
+  background: #f9d74e;
+  color: #0d1b2a;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+  box-shadow: 0 4px 20px rgba(249,215,78,0.3);
+}
+#start-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(249,215,78,0.4); }
+#start-btn:active { transform: translateY(0); }
+
+/* ── Game ── */
+#game { display: none; padding: 0.75rem 1rem 4rem; }
+
+#scoreboard {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 0.6rem;
+}
+
+.player-score {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+  border: 2px solid transparent;
+  transition: all 0.25s;
+  font-size: 0.88rem;
+  background: rgba(255,255,255,0.04);
+}
+.player-score.active-player {
+  border-color: rgba(249,215,78,0.7);
+  background: rgba(249,215,78,0.1);
+}
+
+.score-dot { width: 11px; height: 11px; border-radius: 50%; }
+.score-name { font-weight: 500; }
+.score-pts { font-weight: 700; color: #f9d74e; margin-left: 0.25rem; }
+
+#turn-info {
+  text-align: center;
+  margin-bottom: 0.6rem;
+  font-size: 0.92rem;
+  color: rgba(255,255,255,0.6);
+  min-height: 1.4em;
+}
+
+#board-wrapper {
+  overflow: auto;
+  max-height: calc(100vh - 155px);
+  scrollbar-gutter: stable;
+}
+
+#board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr); /* default, overridden by JS */
+  gap: clamp(2px, 0.5vw, 4px);
+  width: 100%;
+  max-width: min(95vw, 600px);
+  margin: 0 auto;
+}
+
+/* ── Card ── */
+.card {
+  aspect-ratio: 1;
+  cursor: pointer;
+  perspective: 700px;
+  overflow: hidden;
+}
+
+.card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.32s cubic-bezier(.4,0,.2,1);
+  border-radius: 6px;
+}
+
+.card.flipped .card-inner,
+.card.matched .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front, .card-back {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.card-back {
+  background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #1a237e 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.15);
+  background-size: 200% 200%;
+}
+.card-back::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.card-front {
+  background: #f0f4ff;
+  transform: rotateY(180deg);
+  font-size: clamp(1.4rem, 8vw, 3rem);
+}
+
+.card.matched .card-front {
+  background: #e8f5e9;
+  opacity: 0.65;
+}
+
+.card.no-click { pointer-events: none; }
+
+.card:not(.flipped):not(.matched):hover .card-inner {
+  transform: rotateY(10deg) scale(1.04);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+/* ── Win overlay ── */
+#win-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.88);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+#win-overlay.show { display: flex; }
+
+.win-box {
+  background: linear-gradient(160deg, #0d1b2a 0%, #1a237e 100%);
+  border: 2px solid #f9d74e;
+  border-radius: 20px;
+  padding: 2.5rem 3.5rem;
+  text-align: center;
+  box-shadow: 0 0 60px rgba(249,215,78,0.2);
+  animation: pop-in 0.4s cubic-bezier(.34,1.56,.64,1);
+}
+
+@keyframes pop-in {
+  from { transform: scale(0.7); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.win-title {
+  font-size: 2.2rem;
+  color: #f9d74e;
+  margin-bottom: 0.5rem;
+}
+
+.win-subtitle {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.win-scores { font-size: 1.05rem; }
+.win-row { margin-bottom: 0.75rem; line-height: 1.5; }
+.win-breakdown { font-size: 0.78rem; color: rgba(255,255,255,0.45); padding-left: 1.6rem; }
+
+.win-play-again {
+  margin-top: 2rem;
+  padding: 0.7rem 2.2rem;
+  background: #f9d74e;
+  color: #0d1b2a;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.win-play-again:hover { transform: scale(1.04); }
+
+@media (max-height: 620px) {
+  #page-footer { display: none; }
+}
+
+/* ── Rules link ── */
+.rules-link {
+  display: block;
+  text-align: center;
+  color: rgba(255,255,255,0.35);
+  font-size: 0.82rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s;
+  padding: 0.4rem;
+}
+.rules-link:hover { color: rgba(255,255,255,0.7); }
+
+
+/* ── Rules Modal ── */
+#rules-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.78);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+#rules-overlay.show { display: flex; }
+
+.rules-box {
+  background: linear-gradient(160deg, #0d1b2a 0%, #1a237e 100%);
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 20px;
+  padding: 2rem 2.5rem;
+  max-width: 440px;
+  width: 90%;
+  animation: pop-in 0.3s cubic-bezier(.34,1.56,.64,1);
+}
+
+.rules-box h2 {
+  font-size: 1.3rem;
+  color: #f9d74e;
+  margin-bottom: 1.25rem;
+}
+
+.rules-box ol {
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  color: rgba(255,255,255,0.85);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.rules-box li strong { color: #fff; }
+
+.rules-close {
+  margin-top: 1.75rem;
+  width: 100%;
+  padding: 0.6rem;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.rules-close:hover { background: rgba(255,255,255,0.14); }
+
+/* ── Quiz Modal ── */
+#quiz-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.78);
+  z-index: 50;
+  align-items: center;
+  justify-content: center;
+}
+#quiz-overlay.show { display: flex; }
+
+.quiz-box {
+  background: linear-gradient(160deg, #0d1b2a 0%, #1a237e 100%);
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 20px;
+  padding: 2rem 2.5rem;
+  text-align: center;
+  max-width: 420px;
+  width: 90%;
+  animation: pop-in 0.3s cubic-bezier(.34,1.56,.64,1);
+}
+
+.quiz-player-tag {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.2rem 0.75rem;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+  background: currentColor;
+  border: 1.5px solid currentColor;
+}
+
+.quiz-emoji { font-size: 4.5rem; line-height: 1; margin-bottom: 0.6rem; }
+
+.quiz-question {
+  font-size: 1.05rem;
+  color: rgba(255,255,255,0.85);
+  margin-bottom: 1.25rem;
+}
+
+.quiz-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.quiz-opt {
+  padding: 0.65rem 0.5rem;
+  border-radius: 10px;
+  border: 2px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.quiz-opt:not(:disabled):hover { border-color: rgba(249,215,78,0.6); background: rgba(249,215,78,0.1); }
+.quiz-opt.correct { border-color: #2ecc71; background: rgba(46,204,113,0.18); color: #2ecc71; font-weight: 700; }
+.quiz-opt.wrong   { border-color: #e74c3c; background: rgba(231,76,60,0.18); color: #e74c3c; }
+.quiz-opt:disabled { cursor: default; }
+
+#quiz-fact {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.45);
+  font-style: italic;
+  line-height: 1.4;
+  margin-top: 0.9rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: none;
+}
+#quiz-fact.show { display: block; }
+#quiz-fact::before { content: '💡 '; font-style: normal; }
+
+.quiz-result {
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+  min-height: 1.4em;
+  color: rgba(255,255,255,0.7);
+}
+
+.quiz-continue {
+  margin-top: 1.1rem;
+  padding: 0.6rem 1.8rem;
+  background: #f9d74e;
+  color: #0d1b2a;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: none;
+  transition: transform 0.1s;
+}
+.quiz-continue.show { display: inline-block; }
+.quiz-continue:hover { transform: scale(1.04); }
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div id="setup">
+  <h1>QuizMatch</h1>
+  <div class="setup-box">
+    <div class="setup-label">Typ pexesa</div>
+    <div class="deck-btns">
+      <button class="deck-btn" data-deck="animals"><span class="deck-icon">🐾</span>Zvířátka</button>
+      <button class="deck-btn" data-deck="flags"><span class="deck-icon">🌍</span>Vlajky</button>
+      <button class="deck-btn" data-deck="fruits"><span class="deck-icon">🍎</span>Ovoce & zelenina</button>
+      <button class="deck-btn" data-deck="jobs"><span class="deck-icon">👷</span>Povolání</button>
+    </div>
+    <div class="setup-label">Velikost hrací plochy</div>
+    <div class="player-count-btns">
+      <button class="size-btn active" data-size="large">8×8<br><span class="size-sub">Velké</span></button>
+      <button class="size-btn" data-size="medium">6×6<br><span class="size-sub">Střední</span></button>
+      <button class="size-btn" data-size="small">4×4<br><span class="size-sub">Malé</span></button>
+    </div>
+    <div class="setup-label">Počet hráčů</div>
+    <div class="player-count-btns">
+      <button class="pcnt-btn" data-n="2">2</button>
+      <button class="pcnt-btn" data-n="3">3</button>
+      <button class="pcnt-btn" data-n="4">4</button>
+    </div>
+    <div class="setup-label">Jména hráčů</div>
+    <div id="player-inputs"></div>
+    <button id="start-btn">Začít hru &rarr;</button>
+  </div>
+  <a class="rules-link" onclick="openRules()">📖 Pravidla hry</a>
+</div>
+
+<!-- GAME -->
+<div id="game">
+  <div id="scoreboard"></div>
+  <div id="turn-info"></div>
+  <div style="text-align:center;margin-bottom:0.4rem;display:flex;justify-content:center;align-items:center;gap:1rem">
+    <button onclick="location.reload()" style="font-size:0.75rem;padding:0.2rem 0.7rem;background:transparent;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.45);border-radius:6px;cursor:pointer">↺ Nová hra</button>
+    <button id="debug-end" style="display:none;font-size:0.75rem;padding:0.2rem 0.7rem;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);color:rgba(255,100,100,0.8);border-radius:6px;cursor:pointer">⚡ Debug: ukončit hru</button>
+  </div>
+  <div id="board-wrapper">
+    <div id="board"></div>
+  </div>
+</div>
+
+<div id="page-footer" style="position:fixed;bottom:0;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:0.1rem;padding:0.3rem 0 0.5rem;pointer-events:none;background:linear-gradient(to top,rgba(13,27,42,0.95) 60%,transparent)">
+  <a id="game-rules-link" class="rules-link" onclick="openRules()" style="display:none;pointer-events:all">📖 Pravidla hry</a>
+  <p style="font-size:0.72rem;color:rgba(255,255,255,0.25);line-height:1">
+    Vytvořil © <span id="footer-year"></span> <a href="https://www.teamplayer.cz" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.35);pointer-events:all">teamplayer.cz</a>
+  </p>
+</div>
+
+<!-- RULES -->
+<div id="rules-overlay">
+  <div class="rules-box">
+    <h2>📖 Pravidla hry</h2>
+    <ol>
+      <li>Hráči se střídají. Na svém tahu hráč otočí <strong>dvě kartičky</strong>.</li>
+      <li>Pokud se kartičky <strong>shodují</strong>, hráč získá <strong>1 bod</strong> za pár a zobrazí se kvízová otázka.</li>
+      <li>Za <strong>správnou anglickou odpověď</strong> v kvízu hráč získá další <strong>1 bod</strong>.</li>
+      <li>Po nalezeném páru (bez ohledu na kvíz) <strong>hráč hraje znovu</strong>.</li>
+      <li>Pokud se kartičky <strong>neshodují</strong>, jsou otočeny zpět a přichází další hráč.</li>
+      <li>Hra končí, když jsou nalezeny <strong>všechny páry</strong>. Vítězí hráč s nejvíce body.</li>
+    </ol>
+    <button class="rules-close" onclick="closeRules()">Zavřít</button>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz-overlay">
+  <div class="quiz-box">
+    <div class="quiz-player-tag" id="quiz-player-tag"><span style="color:#fff"></span></div>
+    <div class="quiz-emoji" id="quiz-emoji"></div>
+    <div id="quiz-cs-name" style="font-size:1.4rem;font-weight:700;color:#fff;margin-bottom:0.5rem"></div>
+    <div class="quiz-question" id="quiz-question"></div>
+    <div class="quiz-options" id="quiz-options"></div>
+    <div id="quiz-fact"></div>
+    <div class="quiz-result" id="quiz-result"></div>
+    <button class="quiz-continue" id="quiz-continue">Pokračovat →</button>
+  </div>
+</div>
+
+<!-- WIN -->
+<div id="win-overlay">
+  <div class="win-box">
+    <div class="win-title">🎉 Konec hry!</div>
+    <div class="win-subtitle">Výsledky</div>
+    <div class="win-scores" id="win-scores"></div>
+    <button class="win-play-again" id="win-play-again">Hrát znovu</button>
+    <a class="rules-link" onclick="location.reload()" style="margin-top:0.5rem">Nastavení hráčů</a>
+  </div>
+</div>
+
+<script>
+const PLAYER_COLORS = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12'];
+const DEFAULT_NAMES  = ['Hráč 1', 'Hráč 2', 'Hráč 3', 'Hráč 4'];
+
+const DECKS = [
+  {
+    id: 'animals',
+    label: 'Zvířátka',
+    icon: '🐾',
+    question: 'Jak se toto zvířátko řekne anglicky?',
+    pool: {
+      '🐶': { hint: 'Pes',        answer: 'Dog',          fact: 'Čich psa je až 100 000× citlivější než čich člověka.' },
+      '🐱': { hint: 'Kočka',      answer: 'Cat',          fact: 'Kočky tráví spánkem až 70 % svého života.' },
+      '🐭': { hint: 'Myš',        answer: 'Mouse',        fact: 'Myš se dokáže protáhnout otvorem velikosti kuličkového pera.' },
+      '🐹': { hint: 'Křeček',     answer: 'Hamster',      fact: 'Křeček dokáže za noc uběhnout až 8 km v kolečku.' },
+      '🐰': { hint: 'Králík',     answer: 'Rabbit',       fact: 'Králík se fyzicky nedokáže zvracet.' },
+      '🦊': { hint: 'Liška',      answer: 'Fox',          fact: 'Lišky využívají zemské magnetické pole k lovu kořisti pod sněhem.' },
+      '🐻': { hint: 'Medvěd',     answer: 'Bear',         fact: 'Medvěd dokáže běžet rychlostí až 55 km/h.' },
+      '🐼': { hint: 'Panda',      answer: 'Panda',        fact: 'Panda velká sní denně až 40 kg bambusu.' },
+      '🐨': { hint: 'Koala',      answer: 'Koala',        fact: 'Koala spí až 22 hodin denně, aby strávila jedovaté eukalyptové listy.' },
+      '🐯': { hint: 'Tygr',       answer: 'Tiger',        fact: 'Každý tygr má jedinečný vzor pruhů, podobně jako lidské otisky prstů.' },
+      '🦁': { hint: 'Lev',        answer: 'Lion',         fact: 'Samice lvů (lvice) obstarávají většinu lovu v tlupě.' },
+      '🐮': { hint: 'Kráva',      answer: 'Cow',          fact: 'Krávy mají nejlepší přátele a trpí stresem, když jsou od nich odděleny.' },
+      '🐷': { hint: 'Prase',      answer: 'Pig',          fact: 'Prasata jsou považována za inteligentnější než psi a tříleté děti.' },
+      '🐸': { hint: 'Žába',       answer: 'Frog',         fact: 'Žáby nikdy nepijí – vodu vstřebávají kůží.' },
+      '🐵': { hint: 'Opice',      answer: 'Monkey',       fact: 'Šimpanzi se dokáží naučit znakový jazyk a ovládnout přes 300 znaků.' },
+      '🐔': { hint: 'Slepice',    answer: 'Chicken',      fact: 'Slepice si dokáže zapamatovat více než 100 různých tváří.' },
+      '🐧': { hint: 'Tučňák',     answer: 'Penguin',      fact: 'Tučňáci samci nabízejí samici oblázek jako zásnubní dar.' },
+      '🐦': { hint: 'Ptáček',     answer: 'Bird',         fact: 'Někteří ptáci dokáží spát za letu.' },
+      '🦆': { hint: 'Kachna',     answer: 'Duck',         fact: 'Nohy kachen nemají nervy ani cévy, takže kachny necítí chlad.' },
+      '🦅': { hint: 'Orel',       answer: 'Eagle',        fact: 'Orel dokáže spatřit kořist ze vzdálenosti 3 km.' },
+      '🦉': { hint: 'Sova',       answer: 'Owl',          fact: 'Sovy neumí pohybovat očima – místo toho otáčejí celou hlavou až o 270°.' },
+      '🦇': { hint: 'Netopýr',    answer: 'Bat',          fact: 'Netopýři jsou jediní savci schopní aktivního létání.' },
+      '🐺': { hint: 'Vlk',        answer: 'Wolf',         fact: 'Vytí vlka je slyšitelné až na vzdálenost 16 km.' },
+      '🐗': { hint: 'Kanec',      answer: 'Boar',         fact: 'Divoká prasata jsou výborní plavci.' },
+      '🐴': { hint: 'Kůň',        answer: 'Horse',        fact: 'Koně dokáží spát vestoje i vleže.' },
+      '🦄': { hint: 'Jednorožec', answer: 'Unicorn',      fact: 'Jednorožec je národním zvířetem Skotska.' },
+      '🐝': { hint: 'Včela',      answer: 'Bee',          fact: 'Jedna včela za celý život vyprodukuje jen asi 1/12 lžičky medu.' },
+      '🐛': { hint: 'Housenka',   answer: 'Caterpillar',  fact: 'Housenka se uvnitř kukly zcela rozpustí, než se promění v motýla.' },
+      '🦋': { hint: 'Motýl',      answer: 'Butterfly',    fact: 'Motýli chutnají potravy nohama – mají chuťové receptory na tarsech.' },
+      '🐌': { hint: 'Hlemýžď',    answer: 'Snail',        fact: 'Hlemýžď může spát až 3 roky v kuse.' },
+      '🐞': { hint: 'Beruška',    answer: 'Ladybug',      fact: 'Když je beruška ohrožena, krvácí z kolen jako obranný mechanismus.' },
+      '🐜': { hint: 'Mravenec',   answer: 'Ant',          fact: 'Mravenec dokáže unést náklad až 50× těžší, než je jeho vlastní tělo.' },
+      '🐢': { hint: 'Želva',      answer: 'Turtle',       fact: 'Mořské želvy se vždy vrátí na pláž, kde se narodily, aby nakladly vejce.' },
+      '🐍': { hint: 'Had',        answer: 'Snake',        fact: 'Hadi čichají jazykem.' },
+      '🦎': { hint: 'Ještěrka',   answer: 'Lizard',       fact: 'Některé ještěrky si odhodí ocas, aby unikly predátoru – ocas jim poté doroste.' },
+      '🦕': { hint: 'Dinosaurus', answer: 'Dinosaur',     fact: 'Dinosauři obývali Zemi 165 milionů let; lidé existují teprve 300 000 let.' },
+      '🦓': { hint: 'Zebra',      answer: 'Zebra',        fact: 'Každá zebra má jedinečný vzor pruhů – neexistují dvě stejné.' },
+      '🦒': { hint: 'Žirafa',     answer: 'Giraffe',      fact: 'Žirafy spí pouze asi 30 minut denně.' },
+      '🦘': { hint: 'Klokan',     answer: 'Kangaroo',     fact: 'Mládě klokana (joey) je při narození velké jen jako hrozinka.' },
+      '🐘': { hint: 'Slon',       answer: 'Elephant',     fact: 'Sloni jsou jediná zvířata, která nedokáží skočit.' },
+      '🦏': { hint: 'Nosorožec',  answer: 'Rhinoceros',   fact: 'Roh nosorožce je tvořen keratinem – stejnou látkou jako lidské nehty.' },
+      '🦛': { hint: 'Hroch',      answer: 'Hippopotamus', fact: 'Hroši vylučují z kůže přirozenou červenou „opalovací krémy".' },
+      '🐊': { hint: 'Krokodýl',   answer: 'Crocodile',    fact: 'Krokodýli nemohou vypláznou jazyk.' },
+      '🦈': { hint: 'Žralok',     answer: 'Shark',        fact: 'Žraloci jsou starší než stromy – existují déle než 450 milionů let.' },
+      '🐬': { hint: 'Delfín',     answer: 'Dolphin',      fact: 'Delfíni mají navzájem jména a reagují, když je někdo zavolá.' },
+      '🐋': { hint: 'Velryba',    answer: 'Whale',        fact: 'Srdce modré velryby je velké jako malé auto.' },
+      '🐙': { hint: 'Chobotnice', answer: 'Octopus',      fact: 'Chobotnice mají tři srdce a modrou krev.' },
+      '🦞': { hint: 'Humr',       answer: 'Lobster',      fact: 'Humři nestárnou – s věkem jsou silnější a plodnější.' },
+      '🦀': { hint: 'Krab',       answer: 'Crab',         fact: 'Krabi chodí bokem kvůli tvaru svých kloubů.' },
+      '🐟': { hint: 'Ryba',       answer: 'Fish',         fact: 'Ryby se mohou „utopit", pokud je ve vodě nedostatek kyslíku.' },
+      '🦃': { hint: 'Krocan',     answer: 'Turkey',       fact: 'Krocani se dokáží červenat – jejich hlava mění barvu podle nálady.' },
+      '🦚': { hint: 'Páv',        answer: 'Peacock',      fact: 'Barevné peří mají pouze samci – samice jsou nenápadně hnědé.' },
+      '🦜': { hint: 'Papoušek',   answer: 'Parrot',       fact: 'Papoušek šedý africký si dokáže zapamatovat přes 1 000 slov.' },
+      '🦢': { hint: 'Labuť',      answer: 'Swan',         fact: 'Labutě si hledají celoživotního partnera a mohou se dožít 20 let.' },
+      '🦩': { hint: 'Plameňák',   answer: 'Flamingo',     fact: 'Plameňáci jsou růžoví díky krevetám a řasám, které jedí.' },
+      '🦝': { hint: 'Mýval',      answer: 'Raccoon',      fact: 'Mývalové si před jídlem myjí tlapy – mají extrémně citlivé prsty.' },
+      '🦔': { hint: 'Ježek',      answer: 'Hedgehog',     fact: 'Ježci jsou odolní vůči jedu mnoha druhů hadů.' },
+    },
+  },
+  {
+    id: 'flags',
+    label: 'Vlajky',
+    icon: '🌍',
+    question: 'Čí je to vlajka?',
+    pool: {
+      '🇨🇿': { hint: null, answer: 'Česká republika', fact: 'Česká republika má nejvyšší spotřebu piva na obyvatele na světě.' },
+      '🇸🇰': { hint: null, answer: 'Slovensko',        fact: 'Slovensko má přes 6 000 jeskyní, z nichž 12 je zpřístupněno veřejnosti.' },
+      '🇭🇺': { hint: null, answer: 'Maďarsko',         fact: 'Rubiková kostka byla vynalezena v Maďarsku – Ernő Rubik ji sestrojil v roce 1974.' },
+      '🇦🇹': { hint: null, answer: 'Rakousko',         fact: 'Rakousko je rodnou zemí Mozarta, Freuda i Schuberta.' },
+      '🇵🇱': { hint: null, answer: 'Polsko',           fact: 'Polsko je domovem největšího středověkého hradu na světě – hradu Malbork.' },
+      '🇺🇦': { hint: null, answer: 'Ukrajina',         fact: 'Ukrajina je největší zemí zcela ležící v Evropě.' },
+      '🇩🇪': { hint: null, answer: 'Německo',          fact: 'Německo má přes 1 500 druhů piva a více než 1 300 pivovarů.' },
+      '🇺🇸': { hint: null, answer: 'USA',              fact: 'USA mají nejstarší písemnou národní ústavu na světě – přijata v roce 1787.' },
+      '🇬🇧': { hint: null, answer: 'Velká Británie',   fact: 'Velká Británie vynalezla fotbal, který dnes hraje přes 4 miliardy lidí.' },
+      '🇫🇷': { hint: null, answer: 'Francie',          fact: 'Francie je nejnavštěvovanější zemí světa s 90 miliony turistů ročně.' },
+      '🇮🇹': { hint: null, answer: 'Itálie',           fact: 'Itálie má nejvíce památek UNESCO na světě.' },
+      '🇪🇸': { hint: null, answer: 'Španělsko',        fact: 'Ve Španělsku se pořádá La Tomatina – festival, kde se lidé házejí rajčaty.' },
+      '🇯🇵': { hint: null, answer: 'Japonsko',         fact: 'Japonsko je domovem nejstarší firmy světa – Kongō Gumi, stavební firmy z roku 578.' },
+      '🇨🇳': { hint: null, answer: 'Čína',             fact: 'Velká čínská zeď je nejdelší stavba na světě – měří přes 21 000 km.' },
+      '🇷🇺': { hint: null, answer: 'Rusko',            fact: 'Rusko se rozkládá přes 11 časových pásem a zabírá 1/8 světové pevniny.' },
+      '🇧🇷': { hint: null, answer: 'Brazílie',         fact: 'Brazílie je domovem Amazonie, která produkuje 20 % světového kyslíku.' },
+      '🇨🇦': { hint: null, answer: 'Kanada',           fact: 'Kanada má nejdelší pobřežní linii na světě – 202 080 km.' },
+      '🇦🇺': { hint: null, answer: 'Austrálie',        fact: 'Austrálie je jediný kontinent, který je zároveň jednou zemí.' },
+      '🇮🇳': { hint: null, answer: 'Indie',            fact: 'Indie vynalezla nulu a desítkovou soustavu.' },
+      '🇲🇽': { hint: null, answer: 'Mexiko',           fact: 'Mexico City bylo postaveno na jezeře a každý rok klesá o 10 cm.' },
+      '🇰🇷': { hint: null, answer: 'Jižní Korea',      fact: 'Jižní Korea má nejrychlejší průměrnou rychlost internetu na světě.' },
+      '🇳🇱': { hint: null, answer: 'Nizozemsko',       fact: 'Nizozemsko je největším světovým exportérem květin.' },
+      '🇸🇪': { hint: null, answer: 'Švédsko',          fact: 'Švédsko má více ostrovů než kterákoli jiná země – přes 221 000.' },
+      '🇳🇴': { hint: null, answer: 'Norsko',           fact: 'Norsko v 80. letech představilo lososové sushi v Japonsku.' },
+      '🇩🇰': { hint: null, answer: 'Dánsko',           fact: 'Dánsko se v mnoha průzkumech umísťuje jako nejšťastnější země světa.' },
+      '🇨🇭': { hint: null, answer: 'Švýcarsko',        fact: 'Švýcarsko se neúčastnilo žádné války od roku 1815.' },
+      '🇵🇹': { hint: null, answer: 'Portugalsko',      fact: 'Portugalsko je největším světovým producentem korku.' },
+      '🇬🇷': { hint: null, answer: 'Řecko',            fact: 'Řecko má více archeologických muzeí než kterákoli jiná země.' },
+      '🇹🇷': { hint: null, answer: 'Turecko',          fact: 'Turecko je domovem nejstaršího známého lidského sídliště – Çatalhöyük, starého 9 000 let.' },
+      '🇮🇱': { hint: null, answer: 'Izrael',           fact: 'Izrael má nejvyšší počet muzeí na obyvatele na světě.' },
+      '🇸🇦': { hint: null, answer: 'Saúdská Arábie',   fact: 'Saúdská Arábie je největším světovým producentem ropy.' },
+      '🇿🇦': { hint: null, answer: 'Jižní Afrika',     fact: 'Jihoafrická republika je jedinou zemí, která dobrovolně zlikvidovala svůj jaderný arzenál.' },
+      '🇦🇷': { hint: null, answer: 'Argentina',        fact: 'Argentina má nejvyšší počet psychologů na obyvatele na světě.' },
+      '🇧🇪': { hint: null, answer: 'Belgie',           fact: 'Belgii vynalezly hranolky – navzdory jejich názvu „french fries".' },
+      '🇫🇮': { hint: null, answer: 'Finsko',           fact: 'Finsko má nejvíce jezer na světě vzhledem ke své rozloze – přes 188 000.' },
+      '🇮🇪': { hint: null, answer: 'Irsko',            fact: 'Irsko je jedinou zemí, jejímž národním symbolem je hudební nástroj – harfa.' },
+      '🇳🇿': { hint: null, answer: 'Nový Zéland',      fact: 'Nový Zéland byl první zemí, která ženám přiznala volební právo – v roce 1893.' },
+      '🇷🇴': { hint: null, answer: 'Rumunsko',         fact: 'Rumunsko je rodnou zemí legendy o Drákulovi – hrad Bran leží v Transylvánii.' },
+      '🇧🇬': { hint: null, answer: 'Bulharsko',        fact: 'Bulharsko je nejstarší zemí Evropy, která od svého vzniku v r. 681 nezměnila název.' },
+      '🇷🇸': { hint: null, answer: 'Srbsko',           fact: 'Nikola Tesla, vynálezce elektromotoru a transformátoru, byl Srb.' },
+      '🇭🇷': { hint: null, answer: 'Chorvatsko',       fact: 'Kravatu vynalezli v 17. století Chorvaté – slovo „cravat" pochází od slova „Croat".' },
+      '🇸🇮': { hint: null, answer: 'Slovinsko',        fact: 'Slovinsko je jednou z mála zemí, jejichž název obsahuje všech pět samohlásek.' },
+      '🇱🇹': { hint: null, answer: 'Litva',            fact: 'Litva byla posledním pohanským státem Evropy – křesťanství přijala teprve v roce 1387.' },
+      '🇱🇻': { hint: null, answer: 'Lotyšsko',         fact: 'Lotyšsko má nejvyšší podíl žen-vědkyň v Evropské unii.' },
+      '🇪🇪': { hint: null, answer: 'Estonsko',         fact: 'Estonsko bylo první zemí světa s online volbami v národních volbách – v roce 2005.' },
+      '🇪🇬': { hint: null, answer: 'Egypt',            fact: 'Staří Egypťané vynalezli zubní pastu, osvěžovač dechu i kalendář.' },
+      '🇳🇬': { hint: null, answer: 'Nigérie',          fact: 'Nigérie je nejlidnatější zemí Afriky s více než 220 miliony obyvatel.' },
+      '🇰🇪': { hint: null, answer: 'Keňa',             fact: 'Keňa je domovem Velké příkopové propadliny, jednoho z největších geologických divů světa.' },
+      '🇲🇦': { hint: null, answer: 'Maroko',           fact: 'Maroko je jediná africká země s pobřežím jak na Atlantiku, tak ve Středomoří.' },
+      '🇨🇱': { hint: null, answer: 'Chile',            fact: 'Chile je nejdelší zemí světa ze severu na jih – přes 4 300 km.' },
+      '🇵🇪': { hint: null, answer: 'Peru',             fact: 'Peru je domovem Machu Picchu, postaveného Inky kolem roku 1450.' },
+      '🇻🇳': { hint: null, answer: 'Vietnam',          fact: 'Vietnam je největším světovým exportérem kešu a druhým největším exportérem kávy.' },
+      '🇹🇭': { hint: null, answer: 'Thajsko',          fact: 'Thajsko je jedinou zemí jihovýchodní Asie, která nebyla kolonizována evropskými mocnostmi.' },
+      '🇸🇬': { hint: null, answer: 'Singapur',         fact: 'Singapur je jeden ze tří městských států světa – spolu s Monakem a Vatikánem.' },
+      '🇦🇪': { hint: null, answer: 'Emiráty',          fact: 'V Emirátech stojí nejvyšší budova světa – Burj Khalifa (828 m).' },
+      '🇵🇰': { hint: null, answer: 'Pákistán',         fact: 'Pákistán je domovem K2, druhé nejvyšší hory světa.' },
+      '🇰🇿': { hint: null, answer: 'Kazachstán',       fact: 'Kazachstán je největší vnitrozemskou zemí světa.' },
+    },
+  },
+  {
+    id: 'fruits',
+    label: 'Ovoce & zelenina',
+    icon: '🍎',
+    question: 'Jak se tato potravina řekne anglicky?',
+    pool: {
+      '🍎': { hint: 'Jablko',          answer: 'Apple',        fact: 'Na světě existuje přes 7 500 odrůd jablek.' },
+      '🍏': { hint: 'Zelené jablko',   answer: 'Green Apple',  fact: 'Zelená jablka mají více vlákniny a méně cukru než červená.' },
+      '🍐': { hint: 'Hruška',          answer: 'Pear',         fact: 'Hrušky dozrávají zevnitř ven – než jsou měkké zvenčí, mohou být uvnitř přezrálé.' },
+      '🍊': { hint: 'Pomeranč',        answer: 'Orange',       fact: 'Pomeranč je kříženc pomela a mandarinky.' },
+      '🍋': { hint: 'Citron',          answer: 'Lemon',        fact: 'Citrony plavou na vodě, ale limetky se potápějí.' },
+      '🍌': { hint: 'Banán',           answer: 'Banana',       fact: 'Banány jsou botanicky bobule, ale jahody ne.' },
+      '🍉': { hint: 'Meloun',          answer: 'Watermelon',   fact: 'Vodní meloun je z 92 % tvořen vodou – odtud jeho název.' },
+      '🍇': { hint: 'Hrozno',          answer: 'Grapes',       fact: 'Hrozny v mikrovlnné troubě explodují a vytvářejí plazmu.' },
+      '🍓': { hint: 'Jahoda',          answer: 'Strawberry',   fact: 'Jahoda je jediné ovoce se semínky na povrchu – až 200 na jeden plod.' },
+      '🫐': { hint: 'Borůvky',         answer: 'Blueberries',  fact: 'Borůvky jsou jednou z mála přirozeně modrých potravin na světě.' },
+      '🍈': { hint: 'Meloun honeydew', answer: 'Honeydew',     fact: 'Meloun honeydew byl ve starověkém Egyptě považován za posvátný.' },
+      '🍒': { hint: 'Třešně',          answer: 'Cherries',     fact: 'Třešňový strom začíná plodit teprve po 7 letech.' },
+      '🍑': { hint: 'Broskev',         answer: 'Peach',        fact: 'Čína produkuje přibližně 60 % světové úrody broskví.' },
+      '🥭': { hint: 'Mango',           answer: 'Mango',        fact: 'Mango je nejkonzumovanějším ovocem na světě.' },
+      '🍍': { hint: 'Ananas',          answer: 'Pineapple',    fact: 'Ananas roste 18–24 měsíců, než vyprodukuje jediný plod.' },
+      '🥥': { hint: 'Kokos',           answer: 'Coconut',      fact: 'Kokos je botanicky zároveň ovoce, ořech i semeno.' },
+      '🥝': { hint: 'Kiwi',            answer: 'Kiwi',         fact: 'Kiwi obsahuje na 100 g více vitamínu C než pomeranč.' },
+      '🍅': { hint: 'Rajče',           answer: 'Tomato',       fact: 'Rajče je botanicky ovoce, ale americký Nejvyšší soud ho v r. 1893 prohlásil za zeleninu.' },
+      '🫒': { hint: 'Oliva',           answer: 'Olive',        fact: 'Olivovníky se mohou dožít tisíců let – některé ve Středomoří mají přes 2 000 let.' },
+      '🥑': { hint: 'Avokádo',         answer: 'Avocado',      fact: 'Avokádo je pro většinu zvířat jedovaté, ale pro lidi zcela bezpečné.' },
+      '🥦': { hint: 'Brokolice',       answer: 'Broccoli',     fact: 'Brokolice obsahuje přepočteno na kalorie více bílkovin než hovězí steak.' },
+      '🥬': { hint: 'Salát',           answer: 'Lettuce',      fact: 'Salát je z 96 % tvořen vodou – jde o jednu z nejvyšších hodnot u zeleniny.' },
+      '🥒': { hint: 'Okurka',          answer: 'Cucumber',     fact: 'Okurka je z 96 % voda a může snižovat teplotu těla.' },
+      '🌶️': { hint: 'Chilli',          answer: 'Chili Pepper', fact: 'Pálivost chilli se měří ve Scovilleho jednotkách tepla.' },
+      '🫑': { hint: 'Paprika',         answer: 'Bell Pepper',  fact: 'Paprika obsahuje více vitamínu C než pomeranč.' },
+      '🌽': { hint: 'Kukuřice',        answer: 'Corn',         fact: 'Kukuřičný klas má vždy sudý počet řad zrn.' },
+      '🥕': { hint: 'Mrkev',           answer: 'Carrot',       fact: 'Mrkev byla původně fialová – oranžová odrůda byla vyšlechtěna holandskými farmáři v 17. stol.' },
+      '🧄': { hint: 'Česnek',          answer: 'Garlic',       fact: 'Ve starověkém Řecku dostávali olympijští atleti česnek jako povzbuzující prostředek.' },
+      '🧅': { hint: 'Cibule',          answer: 'Onion',        fact: 'Cibule způsobuje slzy, protože uvolňuje látku zvanou syn-propantial-S-oxid.' },
+      '🥔': { hint: 'Brambor',         answer: 'Potato',       fact: 'Brambory byly první potravinou vypěstovanou ve vesmíru – 1995, raketoplán Columbia.' },
+      '🍠': { hint: 'Batát',           answer: 'Sweet Potato', fact: 'Batát není příbuzný s bramborou – patří do zcela jiné rostlinné čeledi.' },
+      '🫘': { hint: 'Fazole',          answer: 'Beans',        fact: 'Fazole se pěstují přes 7 000 let a patří k nejstarším kulturním plodinám vůbec.' },
+      '🍆': { hint: 'Lilek',           answer: 'Eggplant',     fact: 'Lilek je botanicky bobule, podobně jako rajče nebo paprika.' },
+      '🥜': { hint: 'Arašídy',         answer: 'Peanuts',      fact: 'Arašídy nejsou ořechy – jsou to luštěniny, příbuzné fazolím a čočce.' },
+      '🌰': { hint: 'Kaštan',          answer: 'Chestnut',     fact: 'Kaštany jsou jediné ořechy s obsahem vitamínu C.' },
+      '🍄': { hint: 'Houba',           answer: 'Mushroom',     fact: 'Houby nejsou ani rostliny, ani živočichové – patří do vlastní říše Fungi.' },
+      '🫛': { hint: 'Hrách',           answer: 'Pea Pod',      fact: 'Hrách byl použit Gregorem Mendelem k objevení zákonů dědičnosti.' },
+    },
+  },
+  {
+    id: 'jobs',
+    label: 'Povolání',
+    icon: '👷',
+    question: 'Jak se toto povolání řekne anglicky?',
+    pool: {
+      '👨‍⚕️': { hint: 'Lékař',                  answer: 'Doctor',           fact: 'Hippokrates, „otec medicíny", žil ve starověkém Řecku přibližně v 5. stol. př. n. l.' },
+      '👩‍⚕️': { hint: 'Zdravotní sestra',        answer: 'Nurse',            fact: 'Florence Nightingaleová zavedla moderní ošetřovatelství během Krymské války v 19. stol.' },
+      '👨‍🏫': { hint: 'Učitel',                  answer: 'Teacher',          fact: 'Finsko má jedny z nejpřísnějších požadavků na vzdělání učitelů – magisterský titul je povinný.' },
+      '👨‍🎓': { hint: 'Student',                 answer: 'Student',          fact: 'Nejstarší stále fungující univerzita na světě je Univerzita v Boloni, founded 1088.' },
+      '👨‍🍳': { hint: 'Kuchař',                  answer: 'Chef',             fact: 'Titul „šéfkuchař" pochází z francouzského „chef de cuisine" – vedoucí kuchyně.' },
+      '👩‍🌾': { hint: 'Farmářka',                answer: 'Farmer',           fact: 'Zemědělství vzniklo před asi 10 000 lety v oblasti Úrodného půlměsíce na Blízkém východě.' },
+      '👨‍🔧': { hint: 'Mechanik',                answer: 'Mechanic',         fact: 'První automobil byl vyroben v roce 1885 – od té doby mechanici opravují vozidla přes 130 let.' },
+      '👨‍🏭': { hint: 'Dělník',                  answer: 'Factory Worker',   fact: 'Průmyslová revoluce v 18.–19. stol. dramaticky změnila práci v továrnách po celém světě.' },
+      '👷': { hint: 'Stavební dělník',            answer: 'Construction Worker', fact: 'Velká čínská zeď byla stavěna více než 2 000 let – zaměstnávala statisíce dělníků.' },
+      '👮': { hint: 'Policista',                  answer: 'Police Officer',   fact: 'Moderní policie vznikla v Londýně v roce 1829, kdy sir Robert Peel založil Metropolitan Police.' },
+      '🧑‍🚒': { hint: 'Hasič',                   answer: 'Firefighter',      fact: 'První organizovaná hasičská jednotka vznikla ve starověkém Římě – Vigiles, kolem r. 6 n. l.' },
+      '🧑‍✈️': { hint: 'Pilot',                   answer: 'Pilot',            fact: 'Bratři Wrightové uskutečnili první motorový let v roce 1903 – trval pouhých 12 sekund.' },
+      '👨‍🚀': { hint: 'Astronaut',               answer: 'Astronaut',        fact: 'Jurij Gagarin byl prvním člověkem ve vesmíru – obletěl Zemi 12. dubna 1961.' },
+      '👨‍⚖️': { hint: 'Soudce',                  answer: 'Judge',            fact: 'Nejstarší dochovaný zákoník je Chammurapiho zákoník z Babylonu, asi 1754 př. n. l.' },
+      '👨‍💻': { hint: 'Programátor',             answer: 'Programmer',       fact: 'Ada Lovelaceová je považována za první programátorku v historii – žila v 19. stol.' },
+      '🧑‍💼': { hint: 'Manažer',                 answer: 'Manager',          fact: 'Slovo „management" pochází z italského „maneggiare" – ovládat, řídit.' },
+      '🧑‍🔬': { hint: 'Vědec',                   answer: 'Scientist',        fact: 'Marie Curie je jediná osoba, která získala Nobelovu cenu ve dvou různých vědních oborech.' },
+      '🧑‍🔧': { hint: 'Technik',                 answer: 'Technician',       fact: 'Slovo „technologie" pochází z řeckého „techne" – umění, řemeslo, a „logos" – slovo, věda.' },
+      '🧑‍🎨': { hint: 'Umělec',                  answer: 'Artist',           fact: 'Leonardo da Vinci byl zároveň malíř, sochař, vynálezce, hudebník a vědec.' },
+      '🧑‍🎤': { hint: 'Zpěvák',                  answer: 'Singer',           fact: 'Lidský hlas je jediný nástroj, který je vždy s sebou – a každý hlas je zcela jedinečný.' },
+      '🧑‍🎬': { hint: 'Režisér',                 answer: 'Film Director',    fact: 'Bratři Lumiérové natočili první veřejně promítaný film v roce 1895 v Paříži.' },
+      '🧑‍🎓': { hint: 'Absolvent',               answer: 'Graduate',         fact: 'Promoce pochází ze středověkých univerzit, kde byl absolvent „propagován" do vyššího stavu.' },
+      '🧑‍🏫': { hint: 'Profesor',                answer: 'Professor',        fact: 'Slovo „pedagog" pochází z řeckého „paidagogos" – otrok doprovázející děti do školy.' },
+      '🧑‍🌾': { hint: 'Zahradník',               answer: 'Gardener',         fact: 'Visutí zahrady Babylonu jsou považovány za jeden ze sedmi divů starověkého světa.' },
+      '🧑‍🍳': { hint: 'Šéfkuchař',              answer: 'Chef',             fact: 'Michelinský průvodce začal udělovat hvězdy restauracím od roku 1926.' },
+      '🧑‍⚕️': { hint: 'Zdravotník',             answer: 'Paramedic',        fact: 'Červený kříž byl founded v Ženevě v roce 1863 Henrym Dunantem po bitvě u Solferina.' },
+      '💂': { hint: 'Strážce',                    answer: 'Guard',            fact: 'Britská královská stráž (King\'s Guard) hlídá Buckinghamský palác od roku 1660.' },
+      '🕵️': { hint: 'Detektiv',                  answer: 'Detective',        fact: 'Allan Pinkerton founded první soukromou detektivní agenturu v USA v roce 1850.' },
+      '👰': { hint: 'Nevěsta',                    answer: 'Bride',            fact: 'Bílé svatební šaty se staly módou po svatbě britské královny Viktorie v roce 1840.' },
+      '🤵': { hint: 'Ženich',                     answer: 'Groom',            fact: 'Smoking (tuxedo) byl poprvé nošen v roce 1886 v klubu Tuxedo Park v USA.' },
+      '🎅': { hint: 'Santa Claus',                answer: 'Santa Claus',      fact: 'Moderní obraz Santa Clause s červeným oblečením byl popularizován reklamou Coca-Coly ve 30. letech 20. stol.' },
+      '🧑‍🦺': { hint: 'Záchranář',               answer: 'Lifeguard',        fact: 'Moderní záchranná plavecká služba vznikla v 19. stol. na plážích Velké Británie a USA.' },
+      '👩‍💼': { hint: 'Manažerka',               answer: 'Manager',          fact: 'Coco Chanel byla jednou z prvních žen, které vybudovaly světové módní impérium ve 20. stol.' },
+      '👩‍🔬': { hint: 'Vědkyně',                 answer: 'Scientist',        fact: 'Rosalind Franklinová pořídila klíčovou rentgenovou fotografii DNA, jež vedla k objevu dvojité šroubovice.' },
+      '👩‍🏫': { hint: 'Učitelka',                answer: 'Teacher',          fact: 'Maria Montessori vyvinula svou revoluční pedagogickou metodu začátkem 20. stol. v Itálii.' },
+      '👩‍🍳': { hint: 'Kuchařka',               answer: 'Chef',             fact: 'Julia Childová popularizovala francouzskou kuchyni v USA a stala se první televizní celebrity šéfkuchařkou.' },
+      '👨‍🎨': { hint: 'Malíř',                   answer: 'Painter',          fact: 'Pablo Picasso vytvořil během svého života přes 20 000 uměleckých děl.' },
+      '🧑‍🚌': { hint: 'Řidič autobusu',          answer: 'Bus Driver',       fact: 'Londýnský dvoupatrový autobus (double-decker) jezdí od roku 1847 a stal se světovým ikonou.' },
+      '👨‍🚒': { hint: 'Hasič',                   answer: 'Firefighter',      fact: 'Průměrný hasič absolvuje přes 600 hodin výcviku před prvním zásahem v terénu.' },
+    },
+  },
+];
+
+/* ─── Setup UI ─── */
+const SIZE_CONFIG = {
+  large:  { cols: 8, pairs: 32 },
+  medium: { cols: 6, pairs: 18 },
+  small:  { cols: 4, pairs: 8  },
+};
+let numPlayers   = 2;
+let selectedDeck = DECKS[0];
+let selectedSize = SIZE_CONFIG.large;
+
+const setupEl        = document.getElementById('setup');
+const gameEl         = document.getElementById('game');
+const playerInputsEl = document.getElementById('player-inputs');
+const pcntBtns       = document.querySelectorAll('.pcnt-btn');
+const deckBtns       = document.querySelectorAll('.deck-btn');
+
+deckBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    deckBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedDeck = DECKS.find(d => d.id === btn.dataset.deck);
+  });
+});
+deckBtns[0].classList.add('active');
+
+const sizeBtns = document.querySelectorAll('.size-btn');
+sizeBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    sizeBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedSize = SIZE_CONFIG[btn.dataset.size];
+  });
+});
+
+function renderPlayerInputs(n) {
+  playerInputsEl.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const row = document.createElement('div');
+    row.className = 'player-input-row';
+    row.innerHTML = `
+      <div class="player-color-dot" style="background:${PLAYER_COLORS[i]}"></div>
+      <input class="player-name-input" placeholder="${DEFAULT_NAMES[i]}" value="${DEFAULT_NAMES[i]}">
+    `;
+    playerInputsEl.appendChild(row);
+  }
+}
+
+pcntBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    pcntBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    numPlayers = +btn.dataset.n;
+    renderPlayerInputs(numPlayers);
+  });
+});
+
+pcntBtns[0].classList.add('active');
+renderPlayerInputs(2);
+
+document.getElementById('start-btn').addEventListener('click', () => {
+  const inputs = playerInputsEl.querySelectorAll('input');
+  const players = Array.from(inputs).map((inp, i) => ({
+    name: inp.value.trim() || DEFAULT_NAMES[i],
+    color: PLAYER_COLORS[i],
+    score: 0, pairs: 0, quizzes: 0
+  }));
+  setupEl.style.display = 'none';
+  gameEl.style.display  = 'block';
+  document.getElementById('game-rules-link').style.display = 'inline';
+  initGame(players, selectedDeck, selectedSize);
+});
+
+/* ─── Game ─── */
+function initGame(players, deck, size) {
+  let current  = 0;
+  let flipped  = [];
+  let matched  = 0;
+  let locked   = false;
+  const TOTAL  = size.cols * size.cols;
+
+  // Náhodný výber párov z poolu
+  const symbols  = shuffle(Object.keys(deck.pool)).slice(0, size.pairs);
+  const cardDeck = shuffle([...symbols, ...symbols]);
+
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  board.style.gridTemplateColumns = `repeat(${size.cols}, 1fr)`;
+
+  cardDeck.forEach(symbol => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.symbol = symbol;
+    card.innerHTML = `
+      <div class="card-inner">
+        <div class="card-back">🎴</div>
+        <div class="card-front">${symbol}</div>
+      </div>
+    `;
+    card.addEventListener('click', onCardClick);
+    board.appendChild(card);
+  });
+
+  renderScoreboard();
+  updateTurnInfo();
+
+  document.getElementById('debug-end').onclick = () => {
+    players.forEach(p => { p.pairs = Math.floor(Math.random() * 10); p.quizzes = Math.floor(Math.random() * (p.pairs + 1)); p.score = p.pairs + p.quizzes; });
+    endGame(players, deck, size);
+  };
+
+  function onCardClick() {
+    if (locked || this.classList.contains('flipped') || this.classList.contains('matched')) return;
+
+    this.classList.add('flipped');
+    flipped.push(this);
+
+    if (flipped.length === 2) {
+      locked = true;
+      const [a, b] = flipped;
+
+      if (a.dataset.symbol === b.dataset.symbol) {
+        matched += 2;
+        setTimeout(() => {
+          a.classList.add('matched', 'no-click');
+          b.classList.add('matched', 'no-click');
+          flipped = [];
+          players[current].score++;
+          players[current].pairs++;
+          renderScoreboard();
+          showQuiz(a.dataset.symbol, players[current].name, players[current].color, deck, (correct) => {
+            if (correct) { players[current].score++; players[current].quizzes++; }
+            locked = false;
+            renderScoreboard();
+            if (matched === TOTAL) {
+              endGame(players, deck, size);
+            } else {
+              updateTurnInfo(correct
+                ? `✓ Správně! ${players[current].name} hraje znovu.`
+                : `✗ Škoda. ${players[current].name} hraje znovu.`);
+            }
+          });
+        }, 500);
+      } else {
+        setTimeout(() => {
+          a.classList.remove('flipped');
+          b.classList.remove('flipped');
+          flipped  = [];
+          current  = (current + 1) % players.length;
+          locked   = false;
+          renderScoreboard();
+          updateTurnInfo();
+        }, 950);
+      }
+    }
+  }
+
+  function renderScoreboard() {
+    document.getElementById('scoreboard').innerHTML = players.map((p, i) => `
+      <div class="player-score ${i === current ? 'active-player' : ''}">
+        <div class="score-dot" style="background:${p.color}"></div>
+        <span class="score-name">${p.name}</span>
+        <span class="score-pts">${p.score} b.</span>
+      </div>
+    `).join('');
+  }
+
+  function updateTurnInfo(msg) {
+    const el = document.getElementById('turn-info');
+    el.innerHTML = msg
+      ? msg
+      : `Na tahu: <strong style="color:${players[current].color}">${players[current].name}</strong>`;
+  }
+}
+
+/* ─── Quiz ─── */
+function showQuiz(symbol, playerName, playerColor, deck, onDone) {
+  const item    = deck.pool[symbol];
+  const correct = item.answer;
+
+  const others = Object.values(deck.pool)
+    .map(d => d.answer)
+    .filter(a => a !== correct);
+  shuffle(others);
+  const options = shuffle([correct, ...others.slice(0, 3)]);
+
+  document.getElementById('quiz-emoji').textContent    = symbol;
+  document.getElementById('quiz-cs-name').textContent  = item.hint || '';
+  document.getElementById('quiz-question').textContent = deck.question;
+  const tag = document.getElementById('quiz-player-tag');
+  tag.style.color = playerColor;
+  tag.querySelector('span').textContent = playerName;
+
+  const resultEl   = document.getElementById('quiz-result');
+  const continueEl = document.getElementById('quiz-continue');
+  const factEl     = document.getElementById('quiz-fact');
+  resultEl.textContent = '';
+  continueEl.classList.remove('show');
+  factEl.classList.remove('show');
+  factEl.textContent = '';
+
+  const optsEl = document.getElementById('quiz-options');
+  optsEl.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-opt';
+    btn.textContent = opt;
+    btn.addEventListener('click', () => {
+      optsEl.querySelectorAll('.quiz-opt').forEach(b => b.disabled = true);
+      const isCorrect = opt === correct;
+      btn.classList.add(isCorrect ? 'correct' : 'wrong');
+      if (!isCorrect) {
+        optsEl.querySelectorAll('.quiz-opt').forEach(b => {
+          if (b.textContent === correct) b.classList.add('correct');
+        });
+      }
+      resultEl.textContent = isCorrect
+        ? `🎉 Správně! "${correct}" je správná odpověď.`
+        : `❌ Špatně. Správně je "${correct}".`;
+      resultEl.style.color = isCorrect ? '#2ecc71' : '#e74c3c';
+      if (item.fact) {
+        factEl.textContent = item.fact;
+        factEl.classList.add('show');
+      }
+      continueEl.classList.add('show');
+      continueEl.onclick = () => {
+        document.getElementById('quiz-overlay').classList.remove('show');
+        onDone(isCorrect);
+      };
+    });
+    optsEl.appendChild(btn);
+  });
+
+  document.getElementById('quiz-overlay').classList.add('show');
+}
+
+/* ─── End game ─── */
+function endGame(players, deck, size) {
+  const overlay = document.getElementById('win-overlay');
+  overlay.classList.add('show');
+
+  const sorted   = [...players].sort((a, b) => b.score - a.score);
+  const maxScore = sorted[0].score;
+  const winners  = sorted.filter(p => p.score === maxScore);
+  const medals   = ['🥇', '🥈', '🥉', '4️⃣'];
+
+  let header = winners.length > 1
+    ? `<div style="font-size:1.3rem;color:#f9d74e;margin-bottom:0.75rem">🤝 Remíza!</div>`
+    : `<div style="font-size:1.3rem;color:#f9d74e;margin-bottom:0.75rem">🏆 Vítěz: <strong>${winners[0].name}</strong></div>`;
+
+  let rows = sorted.map((p, i) =>
+    `<div class="win-row">
+      <div>${medals[i]} <span style="color:${p.color}">${p.name}</span>: <strong>${p.score} bodů</strong></div>
+      <div class="win-breakdown">🃏 ${pluralize(p.pairs, 'pár', 'páry', 'párů')} &nbsp;+&nbsp; 🧠 ${pluralize(p.quizzes, 'kvíz', 'kvízy', 'kvízů')}</div>
+    </div>`
+  ).join('');
+
+  document.getElementById('win-scores').innerHTML = header + rows;
+
+  document.getElementById('win-play-again').onclick = () => {
+    overlay.classList.remove('show');
+    players.forEach(p => { p.score = 0; p.pairs = 0; p.quizzes = 0; });
+    initGame(players, deck, size);
+  };
+}
+
+function pluralize(n, one, few, many) {
+  if (n === 1) return `${n} ${one}`;
+  if (n >= 2 && n <= 4) return `${n} ${few}`;
+  return `${n} ${many}`;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === ':') {
+    const btn = document.getElementById('debug-end');
+    btn.style.display = btn.style.display === 'none' ? 'inline-block' : 'none';
+  }
+});
+
+document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+/* ─── Rules ─── */
+function openRules()  { document.getElementById('rules-overlay').classList.add('show'); }
+function closeRules() { document.getElementById('rules-overlay').classList.remove('show'); }
+
+/* ─── Utils ─── */
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+</script>
+</body>
+</html>
